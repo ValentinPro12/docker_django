@@ -22,3 +22,6 @@ docker-compose up -d --build
 **step 5**
 
 docker-compose exec web python manage.py migrate --noinput
+
+
+**step 5**
