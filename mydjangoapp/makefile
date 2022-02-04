@@ -22,3 +22,6 @@ stop:
 
 clean:
 	$(CC) down --rmi all
+
+createsuperuser:
+	$(CC) exec web python manage.py createsuperuser

@@ -1,20 +1,27 @@
-# pull official base image
 FROM python:3.9-alpine
-# рабочая директория внутри проекта
-WORKDIR /usr/src/app
 
-# переменные окружения
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Устанавливаем зависимости для Postgre
-RUN apk update \
-    && apk add postgresql-dev gcc python3-dev musl-dev
-
-# устанавливаем зависимости
-RUN pip install --upgrade pip
 COPY ./reg.txt .
-RUN pip install -r reg.txt
 
-# копируем содержимое текущей папки в контейнер
-COPY . .
+# Install postgres client
+RUN apk add --update --no-cache postgresql-client
+
+# Install individual dependencies
+# so that we could avoid installing extra packages to the container
+RUN apk add --update --no-cache --virtual .tmp-build-deps \
+	gcc libc-dev linux-headers postgresql-dev
+RUN pip install -r /reg.txt
+
+# Remove dependencies
+RUN apk del .tmp-build-deps
+
+RUN mkdir /mydjangoapp
+WORKDIR /mydjangoapp
+COPY ./mydjangoapp /mydjangoapp
+
+# [Security] Limit the scope of user who run the docker image
+RUN adduser -D user
+
+USER user
